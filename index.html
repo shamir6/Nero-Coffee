@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NERO - Artisan Coffee Culture</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <style>
+        /* Custom Styles */
+        body {
+            background-color: #111111;
+            color: #E5E7EB; /* gray-200 */
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .font-serif {
+            font-family: 'Cormorant Garamond', serif;
+        }
+        .font-sans {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .hero-bg {
+            background-image: linear-gradient(rgba(17, 17, 17, 0.7), rgba(17, 17, 17, 0.9)), url('hero-coffee.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .accent-gold {
+            color: #D4AF37;
+        }
+        .bg-accent-gold {
+            background-color: #D4AF37;
+        }
+        .border-accent-gold {
+            border-color: #D4AF37;
+        }
+        .ring-accent-gold:focus {
+            --tw-ring-color: #D4AF37;
+        }
+        
+        .nav-link.active {
+            color: #D4AF37;
+            transform: translateX(10px);
+        }
+        .nav-link {
+            transition: all 0.3s ease-in-out;
+        }
+        .nav-link:hover:not(.active) {
+            color: #D4AF37;
+            transform: translateX(10px);
+        }
+
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .fly-to-cart {
+            position: fixed;
+            z-index: 9999;
+            border-radius: 0.5rem;
+            transition: all 0.8s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .cart-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .form-field {
+            position: relative;
+        }
+        .form-field label {
+            transition: color 0.3s ease-out;
+        }
+        .form-field::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #D4AF37;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .form-field:focus-within::after {
+            transform: scaleX(1);
+        }
+        .form-field:focus-within label {
+            color: #D4AF37;
+        }
+        
+        #cart-modal.hidden {
+            display: none;
+        }
+        #cart-panel {
+            transition: transform 0.3s ease-in-out;
+        }
+        #cart-modal.open #cart-panel {
+            transform: translateX(0);
+        }
+
+        .payment-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .payment-option.selected {
+            border-color: #D4AF37;
+            background-color: rgba(212, 175, 55, 0.1);
+        }
+        .payment-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out, margin-top 0.4s ease-in-out;
+        }
+        .payment-details.open {
+            max-height: 500px;
+            margin-top: 1rem;
+        }
+        
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        select option {
+            background-color: #141414;
+            color: #E5E7EB;
+        }
+
+        /* --- START: Checkout Button Animation --- */
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.9); }
+        }
+        .glowing-checkout {
+            animation: glow 2.5s infinite ease-in-out;
+        }
+        /* --- END: Checkout Button Animation --- */
+    </style>
+</head>
+<body class="antialiased">
+
+    <aside class="hidden lg:block fixed top-0 left-0 h-full w-60 bg-[#141414] border-r border-gray-800 p-8 z-30">
+        <a href="#home" class="nav-link-logo text-3xl font-serif font-bold tracking-widest text-white mb-16 block">NERO</a>
+        <nav class="flex flex-col space-y-6">
+            <a href="#home" class="nav-link active">Home</a>
+            <a href="#collection" class="nav-link">Collection</a>
+            <a href="#story" class="nav-link">Our Story</a>
+            <a href="#membership" class="nav-link">Membership</a>
+            <a href="#contact" class="nav-link">Contact</a>
+        </nav>
+    </aside>
+
+    <header class="lg:hidden fixed top-0 left-0 right-0 bg-[#111111] bg-opacity-80 backdrop-blur-sm p-4 flex justify-between items-center z-40">
+        <a href="#home" class="text-2xl font-serif font-bold tracking-widest text-white">NERO</a>
+        <div class="flex items-center space-x-4">
+             <div id="mobile-cart-icon-container" class="relative cursor-pointer">
+                 <i data-feather="shopping-cart" class="text-white"></i>
+                 <span id="mobile-cart-count" class="absolute -top-2 -right-2 bg-accent-gold text-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+             </div>
+            <button id="menu-btn" class="z-50">
+                <i data-feather="menu" class="text-white h-6 w-6"></i>
+            </button>
+        </div>
+    </header>
+    
+    <div id="mobile-menu" class="lg:hidden fixed inset-0 bg-[#111111] flex flex-col items-center justify-center space-y-8 text-2xl z-30 transform translate-x-full transition-transform duration-300 ease-in-out">
+        <a href="#home" class="mobile-nav-link">Home</a>
+        <a href="#collection" class="mobile-nav-link">Collection</a>
+        <a href="#story" class="mobile-nav-link">Our Story</a>
+        <a href="#membership" class="mobile-nav-link">Membership</a>
+        <a href="#contact" class="mobile-nav-link">Contact</a>
+    </div>
+
+    <div class="lg:ml-60">
+        <main>
+            <div class="hidden lg:block fixed top-6 right-8 z-30">
+                <div id="desktop-cart-icon-container" class="relative cursor-pointer">
+                    <i data-feather="shopping-cart" class="text-white h-6 w-6"></i>
+                    <span id="desktop-cart-count" class="absolute -top-2 -right-2 bg-accent-gold text-black text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                </div>
+            </div>
+
+            <section id="home" class="h-screen flex items-center justify-center text-center hero-bg">
+                <div class="scroll-reveal">
+                    <h1 class="text-6xl md:text-8xl font-serif font-bold tracking-wider text-white">NERO</h1>
+                    <p class="text-lg md:text-xl font-serif text-gray-300 mt-2 mb-8 tracking-widest">ARTISAN COFFEE CULTURE</p>
+                    <p class="max-w-xl mx-auto text-gray-400 mb-12">Experience the world's finest single-origin beans, roasted to perfection for the discerning connoisseur.</p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                        <a href="#collection" class="w-full sm:w-auto bg-accent-gold text-black font-bold py-3 px-8 rounded-md hover:bg-opacity-80 transition-colors duration-300 flex items-center justify-center space-x-2">
+                            <span>EXPLORE COLLECTION</span>
+                            <i data-feather="arrow-down" class="h-5 w-5"></i>
+                        </a>
+                        <a href="#story" class="w-full sm:w-auto border border-gray-500 text-white font-bold py-3 px-8 rounded-md hover:bg-white hover:text-black transition-colors duration-300">OUR STORY</a>
+                    </div>
+                </div>
+            </section>
+
+            <section id="collection" class="py-20 px-4 sm:px-6 lg:px-8">
+                <div class="max-w-6xl mx-auto">
+                    <div class="text-center mb-16 scroll-reveal">
+                        <h2 class="text-5xl md:text-6xl font-serif">Our Collection</h2>
+                        <p class="text-gray-400 mt-2">Carefully curated selections for the refined palate.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                        <div class="scroll-reveal group" data-name="Ethiopian Yirgacheffe" data-price="28">
+                            <div class="relative overflow-hidden rounded-lg">
+                                <img src="product-beans.jpg" alt="Ethiopian Yirgacheffe coffee beans" class="product-image w-full h-auto object-cover aspect-square transition-transform duration-500 group-hover:scale-105">
+                                <div class="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <button class="add-to-cart-btn bg-accent-gold text-black font-bold py-3 px-6 rounded-md flex items-center space-x-2">
+                                        <i data-feather="shopping-bag" class="h-5 w-5"></i>
+                                        <span>Add to Cart</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <p class="text-sm text-gray-400">Single Origin Beans</p>
+                                <h3 class="text-2xl font-serif mt-1 text-white">Ethiopian Yirgacheffe</h3>
+                                <p class="text-2xl font-semibold accent-gold mt-2">$28</p>
+                            </div>
+                        </div>
+                        <div class="scroll-reveal group" data-name="Pour-Over Set" data-price="85">
+                            <div class="relative overflow-hidden rounded-lg">
+                                <img src="product-equipment.jpg" alt="Pour-Over Set" class="product-image w-full h-auto object-cover aspect-square transition-transform duration-500 group-hover:scale-105">
+                                <div class="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <button class="add-to-cart-btn bg-accent-gold text-black font-bold py-3 px-6 rounded-md flex items-center space-x-2">
+                                        <i data-feather="shopping-bag" class="h-5 w-5"></i>
+                                        <span>Add to Cart</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <p class="text-sm text-gray-400">Brewing Equipment</p>
+                                <h3 class="text-2xl font-serif mt-1 text-white">Pour-Over Set</h3>
+                                <p class="text-2xl font-semibold accent-gold mt-2">$85</p>
+                            </div>
+                        </div>
+                        <div class="scroll-reveal group" data-name="Signature Mug" data-price="32">
+                            <div class="relative overflow-hidden rounded-lg">
+                                <img src="product-mug.jpg" alt="Signature Mug" class="product-image w-full h-auto object-cover aspect-square transition-transform duration-500 group-hover:scale-105">
+                                 <div class="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <button class="add-to-cart-btn bg-accent-gold text-black font-bold py-3 px-6 rounded-md flex items-center space-x-2">
+                                        <i data-feather="shopping-bag" class="h-5 w-5"></i>
+                                        <span>Add to Cart</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <p class="text-sm text-gray-400">Accessories</p>
+                                <h3 class="text-2xl font-serif mt-1 text-white">Signature Mug</h3>
+                                <p class="text-2xl font-semibold accent-gold mt-2">$32</p>
+                            </div>
+                        </div>
+                        <div class="scroll-reveal group" data-name="Instant Luxury" data-price="24">
+                            <div class="relative overflow-hidden rounded-lg">
+                                <img src="product-instant.jpg" alt="Instant Luxury Coffee" class="product-image w-full h-auto object-cover aspect-square transition-transform duration-500 group-hover:scale-105">
+                                 <div class="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <button class="add-to-cart-btn bg-accent-gold text-black font-bold py-3 px-6 rounded-md flex items-center space-x-2">
+                                        <i data-feather="shopping-bag" class="h-5 w-5"></i>
+                                        <span>Add to Cart</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <p class="text-sm text-gray-400">Instant Coffee</p>
+                                <h3 class="text-2xl font-serif mt-1 text-white">Instant Luxury</h3>
+                                <p class="text-2xl font-semibold accent-gold mt-2">$24</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="story" class="py-20 px-4 sm:px-6 lg:px-8 bg-[#141414]">
+                <div class="max-w-3xl mx-auto text-center scroll-reveal">
+                    <h2 class="text-5xl md:text-6xl font-serif mb-12">Our Story</h2>
+                    <div class="space-y-6 text-gray-400 text-left text-lg leading-relaxed">
+                        <p>In the heart of the world’s most renowned coffee-growing regions, we discovered something extraordinary—a connection between the earth, the farmer, and the cup that transcends the ordinary.</p>
+                        <p><strong class="text-white">NERO was born from a simple belief:</strong> that exceptional coffee is not just a beverage, but an experience. A moment of clarity in a chaotic world. A ritual that deserves reverence.</p>
+                        <p>We travel to remote highlands and valleys, building relationships with farmers who share our obsession with quality. Each bean is hand-selected, representing months of careful cultivation and generations of expertise.</p>
+                        <p>Our roasting process is an art form—a delicate balance of temperature, time, and intuition. We unlock the unique character of each origin, preserving the nuanced flavors that make specialty coffee truly exceptional.</p>
+                        <p class="text-white">For those who understand that the finest things in life are worth seeking, worth savoring, worth celebrating—<strong class="accent-gold">welcome to NERO.</strong></p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="membership" class="py-20 px-4 sm:px-6 lg:px-8">
+                <div class="max-w-5xl mx-auto text-center scroll-reveal">
+                    <p class="text-sm tracking-widest text-gray-400">EXCLUSIVE MEMBERSHIP</p>
+                    <h2 class="text-5xl md:text-6xl font-serif mt-2 mb-4">The Connoisseur Club</h2>
+                    <p class="text-gray-400 max-w-2xl mx-auto mb-12">Join an exclusive community of coffee enthusiasts and receive the world's finest beans delivered to your door.</p>
+                    
+                    <div class="border border-gray-800 rounded-lg p-8 md:p-12 text-left flex flex-col md:flex-row items-center justify-between">
+                        <div>
+                            <h3 class="text-2xl font-serif mb-6 text-white">Membership Benefits</h3>
+                            <ul class="space-y-4 text-gray-300">
+                                <li class="flex items-center space-x-3"><i data-feather="check" class="h-5 w-5 accent-gold"></i><span>Exclusive access to limited-edition beans</span></li>
+                                <li class="flex items-center space-x-3"><i data-feather="check" class="h-5 w-5 accent-gold"></i><span>Freshly roasted and delivered monthly</span></li>
+                                <li class="flex items-center space-x-3"><i data-feather="check" class="h-5 w-5 accent-gold"></i><span>Personalized roast profile selection</span></li>
+                                <li class="flex items-center space-x-3"><i data-feather="check" class="h-5 w-5 accent-gold"></i><span>Free shipping on all orders</span></li>
+                                <li class="flex items-center space-x-3"><i data-feather="check" class="h-5 w-5 accent-gold"></i><span>Members-only tasting events</span></li>
+                            </ul>
+                        </div>
+                        <div class="text-center mt-8 md:mt-0 md:ml-12 flex-shrink-0">
+                            <p class="text-gray-400">Starting at</p>
+                            <p class="text-6xl font-bold accent-gold my-2">$45</p>
+                            <p class="text-gray-400">per month</p>
+                            <button id="join-club-btn" class="w-full mt-6 bg-accent-gold text-black font-bold py-3 px-8 rounded-md hover:bg-opacity-80 transition-colors duration-300">JOIN THE CLUB</button>
+                            <p class="text-xs text-gray-500 mt-2">Cancel anytime. No commitment required.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="contact" class="py-20 px-4 sm:px-6 lg:px-8 bg-[#141414]">
+                <div class="max-w-3xl mx-auto scroll-reveal">
+                    <div class="text-center mb-12">
+                        <h2 class="text-5xl md:text-6xl font-serif">Get in Touch</h2>
+                        <p class="text-gray-400 mt-2">We'd love to hear from you. Reach out for inquiries, partnerships, or just to chat about coffee.</p>
+                    </div>
+                    <form id="contact-form">
+                        <div class="space-y-6">
+                            <div class="form-field">
+                                <label for="name" class="block text-sm font-medium text-gray-400">Name</label>
+                                <input type="text" id="name" name="name" required class="mt-1 block w-full bg-transparent border-b border-gray-600 focus:ring-0 py-2 text-white">
+                            </div>
+                             <div class="form-field">
+                                <label for="email" class="block text-sm font-medium text-gray-400">Email</label>
+                                <input type="email" id="email" name="email" required class="mt-1 block w-full bg-transparent border-b border-gray-600 focus:ring-0 py-2 text-white">
+                            </div>
+                             <div class="form-field">
+                                <label for="message" class="block text-sm font-medium text-gray-400">Message</label>
+                                <textarea id="message" name="message" rows="4" required class="mt-1 block w-full bg-transparent border-b border-gray-600 focus:ring-0 py-2 text-white"></textarea>
+                            </div>
+                        </div>
+                        <div class="mt-8">
+                            <button type="submit" class="w-full bg-accent-gold text-black font-bold py-3 px-8 rounded-md hover:bg-opacity-80 transition-colors duration-300">SEND MESSAGE</button>
+                        </div>
+                         <p id="form-message" class="text-center mt-4 h-5"></p>
+                    </form>
+                </div>
+            </section>
+        </main>
+
+        <footer class="bg-black py-16 px-4 sm:px-6 lg:px-8 text-gray-400">
+            <div class="max-w-6xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div class="md:col-span-2">
+                        <h3 class="text-2xl font-serif font-bold tracking-widest text-white mb-4">NERO</h3>
+                        <p class="max-w-sm">Elevating the art of coffee through meticulous sourcing, expert roasting, and uncompromising quality standards.</p>
+                        <div class="flex space-x-4 mt-6">
+                            <a href="#" class="hover:text-white"><i data-feather="instagram"></i></a>
+                            <a href="#" class="hover:text-white"><i data-feather="facebook"></i></a>
+                            <a href="#" class="hover:text-white"><i data-feather="twitter"></i></a>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white mb-4 tracking-wider">Quick Links</h4>
+                        <ul class="space-y-2 footer-links">
+                            <li><a href="#collection" data-target="collection" class="hover:text-white">Shop</a></li>
+                            <li><a href="#story" data-target="story" class="hover:text-white">About Us</a></li>
+                            <li><a href="#membership" data-target="membership" class="hover:text-white">Membership</a></li>
+                            <li><a href="#contact" data-target="contact" class="hover:text-white">Contact</a></li>
+                        </ul>
+                    </div>
+                     <div>
+                        <h4 class="font-bold text-white mb-4 tracking-wider">Support</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="hover:text-white">Shipping Info</a></li>
+                            <li><a href="#" class="hover:text-white">Returns</a></li>
+                            <li><a href="#" class="hover:text-white">FAQ</a></li>
+                            <li><a href="#" class="hover:text-white">Privacy Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-12 border-t border-gray-800 pt-8 text-center text-sm">
+                    <p>&copy; 2025 NERO Coffee. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <div id="cart-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-40 flex justify-end">
+        <div id="cart-panel" class="w-full max-w-md h-full bg-[#141414] text-white flex flex-col transform translate-x-full overflow-hidden">
+            <div id="cart-view" class="flex flex-col h-full">
+                <div class="flex justify-between items-center p-6 border-b border-gray-800">
+                    <h2 class="text-2xl font-serif">Your Cart</h2>
+                    <button id="close-cart-btn" class="text-gray-400 hover:text-white">
+                        <i data-feather="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div id="cart-items-container" class="flex-grow p-6 space-y-4 overflow-y-auto"></div>
+                <div class="p-6 border-t border-gray-800">
+                    <div class="flex justify-between items-center text-lg">
+                        <span>Subtotal</span>
+                        <span id="cart-subtotal" class="font-bold accent-gold">$0.00</span>
+                    </div>
+                    <button id="checkout-btn" class="w-full mt-4 bg-accent-gold text-black font-bold py-3 px-8 rounded-md hover:bg-opacity-80 transition-colors duration-300">
+                        PROCEED TO CHECKOUT
+                    </button>
+                </div>
+            </div>
+            <div id="checkout-view" class="hidden flex-col h-full">
+                 <div id="checkout-step-1" class="flex flex-col h-full">
+                    <div class="flex items-center p-6 border-b border-gray-800">
+                        <button id="back-to-cart-btn" class="text-gray-400 hover:text-white mr-4"><i data-feather="arrow-left"></i></button>
+                        <h2 class="text-2xl font-serif">Shipping Details</h2>
+                    </div>
+                    <div class="p-6 space-y-4 flex-grow overflow-y-auto">
+                        <div class="form-field"><label class="block text-sm text-gray-400">Full Name</label><input type="text" required class="mt-1 block w-full bg-transparent border-b border-gray-600 focus:ring-0 py-2 text-white"></div>
+                        <div class="form-field"><label class="block text-sm text-gray-400">Phone Number</label><input type="tel" id="phone-number" required class="mt-1 block w-full bg-transparent border-b border-gray-600 focus:ring-0 py-2 text-white"></div>
+                        <div class="form-field"><label class="block text-sm text-gray-400">Address</label><input type="text" required class="mt-1 block w-full bg-transparent border-b border-gray-600 focus:ring-0 py-2 text-white"></div>
+                        <div class="form-field"><label class="block text-sm text-gray-400">City</label><input type="text" required class="mt-1 block w-full bg-transparent border-b border-gray-600 focus:ring-0 py-2 text-white"></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="form-field"><label class="block text-sm text-gray-400">State</label><input type="text" required class="mt-1 block w-full bg-transparent border-b border-gray-600 focus:ring-0 py-2 text-white"></div>
+                            <div class="form-field"><label class="block text-sm text-gray-400">Pin Code</label><input type="text" id="pin-code" required class="mt-1 block w-full bg-transparent border-b border-gray-600 focus:ring-0 py-2 text-white"></div>
+                        </div>
+                    </div>
+                    <div class="p-6 border-t border-gray-800">
+                        <button id="to-payment-btn" class="w-full bg-accent-gold text-black font-bold py-3 px-8 rounded-md hover:bg-opacity-80 transition-colors duration-300">CONTINUE TO PAYMENT</button>
+                    </div>
+                </div>
+                <div id="checkout-step-2" class="hidden flex-col h-full">
+                    <div class="flex items-center p-6 border-b border-gray-800">
+                        <button id="back-to-shipping-btn" class="text-gray-400 hover:text-white mr-4"><i data-feather="arrow-left"></i></button>
+                        <h2 class="text-2xl font-serif">Payment</h2>
+                    </div>
+                     <div class="p-6 space-y-4 flex-grow overflow-y-auto">
+                        <div class="space-y-3">
+                            <div class="payment-option selected border border-gray-700 rounded-md p-4 cursor-pointer flex items-center" data-payment="card">
+                                <i data-feather="credit-card" class="mr-3"></i><span>Credit / Debit Card</span>
+                            </div>
+                            <div class="payment-details open" id="card-details">
+                                <div class="space-y-4">
+                                    <div class="form-field"><label class="block text-sm text-gray-400">Card Number</label><input type="text" id="card-number" placeholder="1234 5678 9123 4567" required class="mt-1 block w-full bg-transparent border-b border-gray-600 focus:ring-0 py-2 text-white"></div>
+                                    <div class="form-field"><label class="block text-sm text-gray-400">Name on Card</label><input type="text" required class="mt-1 block w-full bg-transparent border-b border-gray-600 focus:ring-0 py-2 text-white"></div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="form-field"><label class="block text-sm text-gray-400">Expiry (MM/YY)</label><input type="text" placeholder="MM/YY" required class="mt-1 block w-full bg-transparent border-b border-gray-600 focus:ring-0 py-2 text-white"></div>
+                                        <div class="form-field"><label class="block text-sm text-gray-400">CVV</label><input type="text" id="card-cvv" placeholder="•••" required class="mt-1 block w-full bg-transparent border-b border-gray-600 focus:ring-0 py-2 text-white"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="payment-option border border-gray-700 rounded-md p-4 cursor-pointer flex items-center" data-payment="upi">
+                                <i data-feather="smartphone" class="mr-3"></i><span>UPI</span>
+                            </div>
+                             <div class="payment-details" id="upi-details">
+                                 <div class="form-field"><label class="block text-sm text-gray-400">UPI ID</label><input type="text" placeholder="yourname@bank" required class="mt-1 block w-full bg-transparent border-b border-gray-600 focus:ring-0 py-2 text-white"></div>
+                             </div>
+                             <div class="payment-option border border-gray-700 rounded-md p-4 cursor-pointer flex items-center" data-payment="cod">
+                                <i data-feather="dollar-sign" class="mr-3"></i><span>Cash on Delivery</span>
+                           </div>
+                           <div class="payment-details" id="cod-details">
+                               <p class="text-sm text-gray-400">Pay with cash upon delivery of your order.</p>
+                           </div>
+                        </div>
+                    </div>
+                    <div class="p-6 border-t border-gray-800">
+                         <button id="place-order-btn" class="w-full bg-accent-gold text-black font-bold py-3 px-8 rounded-md hover:bg-opacity-80 transition-colors duration-300">PLACE ORDER</button>
+                    </div>
+                </div>
+                 <div id="checkout-step-3" class="hidden flex-col h-full items-center justify-center p-6 text-center">
+                    <i data-feather="check-circle" class="w-16 h-16 text-green-400 mb-4"></i>
+                    <h2 class="text-2xl font-serif">Thank You!</h2>
+                    <p class="text-gray-400 mt-2">Your order has been placed successfully. A confirmation email is on its way.</p>
+                    <button id="close-confirmation-btn" class="w-full mt-8 bg-gray-700 text-white font-bold py-3 px-8 rounded-md hover:bg-gray-600 transition-colors duration-300">CLOSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Feather Icons
+        feather.replace();
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- START: Full Cart Functionality ---
+            const desktopCartCount = document.getElementById('desktop-cart-count');
+            const mobileCartCount = document.getElementById('mobile-cart-count');
+            const desktopCartIconContainer = document.getElementById('desktop-cart-icon-container');
+            const mobileCartIconContainer = document.getElementById('mobile-cart-icon-container');
+            const cartModal = document.getElementById('cart-modal');
+            const closeCartBtn = document.getElementById('close-cart-btn');
+            const cartItemsContainer = document.getElementById('cart-items-container');
+            const cartSubtotalEl = document.getElementById('cart-subtotal');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            const cartView = document.getElementById('cart-view');
+            const checkoutView = document.getElementById('checkout-view');
+            const checkoutStep1 = document.getElementById('checkout-step-1');
+            const checkoutStep2 = document.getElementById('checkout-step-2');
+            const checkoutStep3 = document.getElementById('checkout-step-3');
+            const backToCartBtn = document.getElementById('back-to-cart-btn');
+            const toPaymentBtn = document.getElementById('to-payment-btn');
+            const backToShippingBtn = document.getElementById('back-to-shipping-btn');
+            const placeOrderBtn = document.getElementById('place-order-btn');
+            const closeConfirmationBtn = document.getElementById('close-confirmation-btn');
+            const joinClubBtn = document.getElementById('join-club-btn');
+            
+            let cartItems = [];
+
+            function updateCartCount() {
+                const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+                desktopCartCount.textContent = totalItems;
+                mobileCartCount.textContent = totalItems;
+                const isCartEmpty = totalItems === 0;
+                checkoutBtn.disabled = isCartEmpty;
+                checkoutBtn.classList.toggle('opacity-50', isCartEmpty);
+                checkoutBtn.classList.toggle('cursor-not-allowed', isCartEmpty);
+                if (!isCartEmpty) {
+                    checkoutBtn.classList.add('glowing-checkout');
+                } else {
+                    checkoutBtn.classList.remove('glowing-checkout');
+                }
+            }
+
+            function updateCartModal() {
+                cartItemsContainer.innerHTML = '';
+                if (cartItems.length === 0) {
+                    cartItemsContainer.innerHTML = `<p class="text-gray-400 text-center">Your cart is empty.</p>`;
+                } else {
+                    cartItems.forEach(item => {
+                        const itemEl = document.createElement('div');
+                        itemEl.className = 'flex justify-between items-center';
+                        itemEl.innerHTML = `
+                            <div class="w-3/5">
+                                <h4 class="font-bold truncate">${item.name}</h4>
+                                <div class="flex items-center space-x-2 text-sm text-gray-400 mt-1">
+                                    <button class="quantity-change text-lg leading-none" data-name="${item.name}" data-action="decrease">-</button>
+                                    <span>${item.quantity}</span>
+                                    <button class="quantity-change text-lg leading-none" data-name="${item.name}" data-action="increase">+</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <p class="font-semibold accent-gold">$${(item.price * item.quantity).toFixed(2)}</p>
+                                <button class="remove-from-cart text-gray-500 hover:text-red-500" data-name="${item.name}">
+                                    <i data-feather="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        `;
+                        cartItemsContainer.appendChild(itemEl);
+                    });
+                }
+                const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                cartSubtotalEl.textContent = `$${subtotal.toFixed(2)}`;
+                feather.replace();
+            }
+
+            cartItemsContainer.addEventListener('click', (e) => {
+                const target = e.target.closest('button');
+                if (!target) return;
+                const itemName = target.dataset.name;
+                const existingItem = cartItems.find(item => item.name === itemName);
+
+                if (target.classList.contains('remove-from-cart')) {
+                    cartItems = cartItems.filter(item => item.name !== itemName);
+                } else if (target.classList.contains('quantity-change') && existingItem) {
+                    if (target.dataset.action === 'increase') {
+                        existingItem.quantity++;
+                    } else if (target.dataset.action === 'decrease') {
+                        existingItem.quantity--;
+                        if (existingItem.quantity === 0) {
+                            cartItems = cartItems.filter(item => item.name !== itemName);
+                        }
+                    }
+                }
+                updateCartCount();
+                updateCartModal();
+            });
+
+            function showView(view) {
+                [cartView, checkoutView].forEach(v => v.style.display = 'none');
+                view.style.display = 'flex';
+            }
+             function showStep(step) {
+                [checkoutStep1, checkoutStep2, checkoutStep3].forEach(s => s.style.display = 'none');
+                step.style.display = 'flex';
+                feather.replace();
+            }
+
+            function openCart(goToCheckout = false) {
+                updateCartModal();
+                cartModal.classList.remove('hidden');
+                setTimeout(() => {
+                    cartModal.classList.add('open');
+                    if (goToCheckout) {
+                        showView(checkoutView);
+                        showStep(checkoutStep1);
+                    } else {
+                        showView(cartView);
+                    }
+                }, 10);
+            }
+
+            function closeCart() {
+                cartModal.classList.remove('open');
+                setTimeout(() => cartModal.classList.add('hidden'), 300);
+            }
+            
+            checkoutBtn.addEventListener('click', () => { if (cartItems.length > 0) showView(checkoutView); });
+            backToCartBtn.addEventListener('click', () => showView(cartView));
+            toPaymentBtn.addEventListener('click', () => showStep(checkoutStep2));
+            backToShippingBtn.addEventListener('click', () => showStep(checkoutStep1));
+            placeOrderBtn.addEventListener('click', () => {
+                showStep(checkoutStep3);
+                cartItems = [];
+                updateCartCount();
+            });
+            closeConfirmationBtn.addEventListener('click', closeCart);
+
+            joinClubBtn.addEventListener('click', () => {
+                const itemName = 'Connoisseur Club Membership';
+                const itemPrice = 45;
+                const existingItem = cartItems.find(item => item.name === itemName);
+                if (!existingItem) {
+                    cartItems.push({ name: itemName, price: itemPrice, quantity: 1 });
+                }
+                updateCartCount();
+                openCart(true); // Open cart and go directly to checkout
+            });
+
+            desktopCartIconContainer.addEventListener('click', () => openCart());
+            mobileCartIconContainer.addEventListener('click', () => openCart());
+            closeCartBtn.addEventListener('click', closeCart);
+            cartModal.addEventListener('click', (e) => {
+                if (e.target === cartModal) closeCart();
+            });
+            
+             // Payment Method Logic
+            const paymentOptions = document.querySelectorAll('.payment-option');
+            paymentOptions.forEach(option => {
+                option.addEventListener('click', () => {
+                    paymentOptions.forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+
+                    document.querySelectorAll('.payment-details').forEach(detail => detail.classList.remove('open'));
+                    const detailId = `${option.dataset.payment}-details`;
+                    document.getElementById(detailId)?.classList.add('open');
+                });
+            });
+
+            document.getElementById('card-number').addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, '').substring(0, 16);
+                e.target.value = value.replace(/(\d{4})/g, '$1 ').trim();
+            });
+            document.getElementById('card-cvv').addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
+            });
+            document.getElementById('phone-number').addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/\D/g, '').substring(0, 12);
+            });
+            document.getElementById('pin-code').addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/\D/g, '').substring(0, 6);
+            });
+
+
+            const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+            addToCartButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const productCard = button.closest('.scroll-reveal');
+                    const itemName = productCard.dataset.name;
+                    const itemPrice = parseFloat(productCard.dataset.price);
+
+                    const existingItem = cartItems.find(item => item.name === itemName);
+                    if (existingItem) {
+                        existingItem.quantity++;
+                    } else {
+                        cartItems.push({ name: itemName, price: itemPrice, quantity: 1 });
+                    }
+                    updateCartCount();
+
+                    const originalButtonText = button.innerHTML;
+                    button.disabled = true;
+                    button.innerHTML = `<i data-feather="check" class="h-5 w-5"></i><span>Added!</span>`;
+                    feather.replace();
+
+                    const productImage = productCard.querySelector('.product-image');
+                    const imageClone = productImage.cloneNode(true);
+                    const startRect = productImage.getBoundingClientRect();
+                    
+                    imageClone.classList.add('fly-to-cart');
+                    Object.assign(imageClone.style, { top: `${startRect.top}px`, left: `${startRect.left}px`, width: `${startRect.width}px`, height: `${startRect.height}px` });
+                    document.body.appendChild(imageClone);
+
+                    requestAnimationFrame(() => {
+                        const isMobile = window.innerWidth < 1024;
+                        const endRect = isMobile ? mobileCartIconContainer.getBoundingClientRect() : desktopCartIconContainer.getBoundingClientRect();
+                        Object.assign(imageClone.style, { top: `${endRect.top + endRect.height / 2}px`, left: `${endRect.left + endRect.width / 2}px`, width: '20px', height: '20px', opacity: '0' });
+                    });
+
+                    setTimeout(() => {
+                        [desktopCartIconContainer, mobileCartIconContainer].forEach(el => el.classList.add('cart-shake'));
+                    }, 200);
+
+                    setTimeout(() => {
+                        imageClone.remove();
+                        [desktopCartIconContainer, mobileCartIconContainer].forEach(el => el.classList.remove('cart-shake'));
+                        button.disabled = false;
+                        button.innerHTML = originalButtonText;
+                        feather.replace();
+                    }, 1500);
+                });
+            });
+
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = menuBtn.querySelector('i');
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('translate-x-full');
+                menuIcon.setAttribute('data-feather', mobileMenu.classList.contains('translate-x-full') ? 'menu' : 'x');
+                feather.replace();
+            });
+            
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('translate-x-full');
+                    menuIcon.setAttribute('data-feather', 'menu');
+                    feather.replace();
+                });
+            });
+
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, { threshold: 0.5 });
+            sections.forEach(section => sectionObserver.observe(section));
+
+            const footerLinks = document.querySelectorAll('.footer-links a');
+            footerLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    const targetId = e.target.dataset.target;
+                    navLinks.forEach(navLink => {
+                        navLink.classList.toggle('active', navLink.getAttribute('href').substring(1) === targetId);
+                    });
+                });
+            });
+            
+            const scrollElements = document.querySelectorAll('.scroll-reveal');
+            const revealObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            scrollElements.forEach(el => revealObserver.observe(el));
+
+            const contactForm = document.getElementById('contact-form');
+            const formMessage = document.getElementById('form-message');
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                formMessage.textContent = 'Thank you! Your message has been sent.';
+                formMessage.classList.add('text-green-400');
+                
+                setTimeout(() => {
+                    formMessage.textContent = '';
+                    formMessage.classList.remove('text-green-400');
+                    contactForm.reset();
+                }, 3000);
+            });
+        });
+    </script>
+</body>
+</html>
